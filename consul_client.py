@@ -1,7 +1,8 @@
 import requests
 import json
 from .service_info import ServiceInfo
-import os
+from urllib.parse import quote
+from typing import Union
 
 class ConsulClient:
     def __init__(self):
@@ -38,3 +39,17 @@ class ConsulClient:
         print(f"PUT {url}")
         print(response.text)
         return response.ok
+    
+    def get_service_address(self, service_name):
+        encoded_service_name = quote(service_name)
+        url = f"http://{self.consul_ip}:{self.consul_port}/v1/catalog/service/{encoded_service_name}"
+        response = requests.get(url)
+        if response.ok:
+            services = response.json()
+            if services:
+                # Assuming there may be multiple instances of the service, we return the first one
+                service = services[0]
+                address = service["ServiceAddress"]
+                port = service["ServicePort"]
+                return address, str(port)
+        return '', ''
