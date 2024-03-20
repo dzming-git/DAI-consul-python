@@ -52,4 +52,4 @@ class ConsulClient:
                 host = service["ServiceAddress"]
                 port = service["ServicePort"]
                 return host, port
-        return '', ''
+        return '', -1
