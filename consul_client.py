@@ -2,20 +2,20 @@ import requests
 import json
 from .service_info import ServiceInfo
 from urllib.parse import quote
-from typing import Union
+from typing import Tuple
 
 class ConsulClient:
     def __init__(self):
-        self.consul_ip = "127.0.0.1"
-        self.consul_port = "8500"
+        self.consul_ip: str = "127.0.0.1"
+        self.consul_port: int = 8500
 
-    def register_service(self, service_info: ServiceInfo):
+    def register_service(self, service_info: ServiceInfo) -> bool:
         url = f"http://{self.consul_ip}:{self.consul_port}/v1/agent/service/register"
         service_info_dict = {
             "Id": service_info.service_id,
             "Name": service_info.service_name,
             "Address": service_info.service_ip,
-            "Port": int(service_info.service_port),
+            "Port": service_info.service_port,
             "Tags": service_info.service_tags
         }
         
@@ -40,7 +40,7 @@ class ConsulClient:
         print(response.text)
         return response.ok
     
-    def get_service_address(self, service_name):
+    def get_service_address(self, service_name: str) -> Tuple[str, int]:
         encoded_service_name = quote(service_name)
         url = f"http://{self.consul_ip}:{self.consul_port}/v1/catalog/service/{encoded_service_name}"
         response = requests.get(url)
@@ -49,7 +49,7 @@ class ConsulClient:
             if services:
                 # Assuming there may be multiple instances of the service, we return the first one
                 service = services[0]
-                address = service["ServiceAddress"]
+                host = service["ServiceAddress"]
                 port = service["ServicePort"]
-                return address, str(port)
+                return host, port
         return '', ''

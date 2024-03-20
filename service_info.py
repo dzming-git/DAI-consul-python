@@ -13,6 +13,6 @@ class ServiceInfo:
         self.service_id: str
         self.service_name: str
         self.service_ip: str
-        self.service_port: str
+        self.service_port: int
         self.service_tags: List[str] = list()
         self.service_check: ServiceCheck = ServiceCheck()
