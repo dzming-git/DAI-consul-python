@@ -9,7 +9,7 @@ class ConsulClient:
         self.consul_ip: str = "127.0.0.1"
         self.consul_port: int = 8500
 
-    def register_service(self, service_info: ServiceInfo) -> bool:
+    def register_service(self, service_info: ServiceInfo) -> None:
         url = f"http://{self.consul_ip}:{self.consul_port}/v1/agent/service/register"
         service_info_dict = {
             "Id": service_info.service_id,
@@ -38,7 +38,8 @@ class ConsulClient:
         response = requests.put(url, data=payload, headers=headers)
         print(f"PUT {url}")
         print(response.text)
-        return response.ok
+        if not response.ok:
+            raise Exception(f"Failed to register service: {response.text}")
     
     def get_service_address(self, service_name: str) -> Tuple[str, int]:
         encoded_service_name = quote(service_name)
@@ -52,4 +53,7 @@ class ConsulClient:
                 host = service["ServiceAddress"]
                 port = service["ServicePort"]
                 return host, port
-        return '', -1
+            else:
+                raise Exception(f"Service {service_name} not found in Consul.")
+        else:
+            raise Exception(f"Failed to query Consul API: {response.status_code} {response.reason}")
